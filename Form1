@@ -1,0 +1,80 @@
+using SinhVien.BLL;
+using System.Data;
+
+namespace SinhVien.GUI;
+
+public class Form1 : Form
+{
+    private readonly DataGridView dgvSinhVien = new();
+    private readonly Button btnTaiLai = new();
+    private readonly Label lblTieuDe = new();
+    private readonly SinhVienService service = new();
+
+    public Form1()
+    {
+        Text = "Danh sách sinh viên";
+        StartPosition = FormStartPosition.CenterScreen;
+        Width = 900;
+        Height = 520;
+        MinimumSize = new Size(720, 400);
+        Font = new Font("Segoe UI", 10);
+
+        lblTieuDe.Text = "DANH SÁCH SINH VIÊN";
+        lblTieuDe.Font = new Font("Segoe UI", 16, FontStyle.Bold);
+        lblTieuDe.AutoSize = true;
+        lblTieuDe.Location = new Point(24, 18);
+
+        btnTaiLai.Text = "Tải lại danh sách";
+        btnTaiLai.Size = new Size(150, 36);
+        btnTaiLai.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        btnTaiLai.Location = new Point(Width - 195, 18);
+        btnTaiLai.Click += (_, _) => TaiDanhSach();
+
+        dgvSinhVien.Location = new Point(24, 75);
+        dgvSinhVien.Size = new Size(Width - 72, Height - 130);
+        dgvSinhVien.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        dgvSinhVien.ReadOnly = true;
+        dgvSinhVien.AllowUserToAddRows = false;
+        dgvSinhVien.AllowUserToDeleteRows = false;
+        dgvSinhVien.AutoGenerateColumns = false;
+        dgvSinhVien.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        dgvSinhVien.MultiSelect = false;
+        dgvSinhVien.RowHeadersVisible = false;
+        dgvSinhVien.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        dgvSinhVien.BackgroundColor = Color.White;
+        dgvSinhVien.Columns.Add(new DataGridViewTextBoxColumn {
+            DataPropertyName = "Id", HeaderText = "Id", FillWeight = 15
+        });
+        dgvSinhVien.Columns.Add(new DataGridViewTextBoxColumn {
+            DataPropertyName = "FullName", HeaderText = "FullName", FillWeight = 35
+        });
+        dgvSinhVien.Columns.Add(new DataGridViewTextBoxColumn {
+            DataPropertyName = "Grade", HeaderText = "Grade", FillWeight = 20,
+            DefaultCellStyle = new DataGridViewCellStyle { Format = "0.##" }
+        });
+        dgvSinhVien.Columns.Add(new DataGridViewTextBoxColumn {
+            DataPropertyName = "Email", HeaderText = "Email", FillWeight = 35
+        });
+
+        Controls.Add(lblTieuDe);
+        Controls.Add(btnTaiLai);
+        Controls.Add(dgvSinhVien);
+        Load += (_, _) => TaiDanhSach();
+        Resize += (_, _) => btnTaiLai.Location = new Point(ClientSize.Width - btnTaiLai.Width - 24, 18);
+    }
+
+    private void TaiDanhSach()
+    {
+        try
+        {
+            dgvSinhVien.DataSource = null;
+            dgvSinhVien.DataSource = service.LayDanhSachSinhVien();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "Không tải được danh sách sinh viên. Hãy kiểm tra SQL Server, connection string và đã chạy file SQL chưa.\n\nChi tiết: " + ex.Message,
+                "Lỗi kết nối cơ sở dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
